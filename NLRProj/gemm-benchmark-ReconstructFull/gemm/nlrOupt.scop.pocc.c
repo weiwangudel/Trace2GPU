@@ -1,3 +1,4 @@
+#include <math.h>
 
 
 #include <stdio.h>
@@ -38,21 +39,41 @@ int main()
     double A3216936832 = 2123;
     double A3216936840 = 32412;
 
-    #pragma scop
-    for ( i0 = 0; i0 <= 9; i0++) 
-        for ( i1 = 0; i1 <= 9; i1++) 
-        {
-            A160661888 [( 10*i0 + i1 ) ] = 
-            A160661888 [( 10*i0 + i1 ) ] * 
-            A3216936832 ; 
-            for ( i2 = 0; i2 <= 9; i2++) 
-                A160661888 [( 10*i0 + i1 ) ] = 
-                A160661888 [( 10*i0 + i1 ) ] + 
-                A3216936840 * 
-                A160662720 [( 10*i0 + i2 ) ] * 
-                A160663552 [( i1 + 10*i2 ) ] ; 
-	}
-    #pragma endscop
+#ifdef ceild
+# undef ceild
+#endif
+#ifdef floord
+# undef floord
+#endif
+#ifdef max
+# undef max
+#endif
+#ifdef min
+# undef min
+#endif
+#define ceild(n,d)  ceil(((double)(n))/((double)(d)))
+#define floord(n,d) floor(((double)(n))/((double)(d)))
+#define max(x,y)    ((x) > (y)? (x) : (y))
+#define min(x,y)    ((x) < (y)? (x) : (y))
+
+
+  int lbv, ubv, lb, ub, lb1, ub1, lb2, ub2;
+  int c1, c3, c5;
+
+#pragma acc data copyin(A160662720, A160663552) copy(A160661888)
+{
+#pragma acc kernels
+{
+for (c1 = 0; c1 <= 9; c1++) {
+  for (c3 = 0; c3 <= 9; c3++) {
+    A160661888[(10*c1+c3)]=A160661888[(10*c1+c3)]*A3216936832;
+    for (c5 = 0; c5 <= 9; c5++) {
+      A160661888[(10*c1+c3)]=A160661888[(10*c1+c3)]+A3216936840*A160662720[(10*c1+c5)]*A160663552[(c3+10*c5)];
+    }
+  }
+}
+}
+}
 
     //verify results
     print_array(A160661888);
