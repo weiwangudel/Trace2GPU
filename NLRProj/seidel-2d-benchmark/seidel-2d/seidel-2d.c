@@ -30,7 +30,10 @@ void init_array (int n,
 
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
-      A[i][j] = ((DATA_TYPE) i*(j+2) + 2) / n;
+    {
+      TnsMemWr(A[i][j]) = ((DATA_TYPE) i*(j+2) + 2) / n;
+      fprintf(fid,"\n");
+    }
 }
 
 
