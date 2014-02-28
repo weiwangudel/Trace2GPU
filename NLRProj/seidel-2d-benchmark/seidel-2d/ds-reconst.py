@@ -9,13 +9,16 @@ import string
 import re      
 
 def belongs_to(address,bases,tops):
+  flag = 0    
   for i in range(len(bases)):
     if ((long(address) > bases[i]) and 
 	(long(address) < tops[i])):
       print bases[i],
       print "+",
       print (long(address) - bases[i]),
-    else:
+      flag = 1
+      break 
+  if (not flag):
 	print address,
                                                           
 
