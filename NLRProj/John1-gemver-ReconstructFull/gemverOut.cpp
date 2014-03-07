@@ -27,25 +27,25 @@ FILE* fid = NULL;
 
 double* TnsMem(double* pData)
 {
-	fprintf(fid, "Read@ %X " , (unsigned int)pData);
+	fprintf(fid, "Read 0x%X " , (unsigned int)pData);
 	return pData;
 }
 
 double& TnsMem(double& rData)
 {
-	fprintf(fid, "Read@ %X " , (unsigned int)&rData);
+	fprintf(fid, "Read 0x%X " , (unsigned int)&rData);
 	return rData;
 }
 
 int& TnsMem(int& rData)
 {
-	fprintf(fid, "Read@ %X " , (unsigned int)&rData);
+	fprintf(fid, "Read 0x%X " , (unsigned int)&rData);
 	return rData;
 }
 
 double& TnsMemWr(double& rData)
 {
-	fprintf(fid, "Write@ %X " , (unsigned int)&rData);
+	fprintf(fid, "Write 0x%X " , (unsigned int)&rData);
 	return rData;
 }
 
@@ -81,8 +81,8 @@ DATA_TYPE* z = (DATA_TYPE*)malloc(N * sizeof(DATA_TYPE));
   int i;
   for (i = 0; i < N; ++i)
     {
-      TnsMemWr(A[TnsMem(i)]) = (DATA_TYPE*)malloc(TnsMem(N) * sizeof(DATA_TYPE));
-      TnsMemWr(B[TnsMem(i)]) = (DATA_TYPE*)malloc(TnsMem(N) * sizeof(DATA_TYPE));
+      TnsMemWr(A[(i)]) = (DATA_TYPE*)malloc(TnsMem(N) * sizeof(DATA_TYPE));
+      TnsMemWr(B[(i)]) = (DATA_TYPE*)malloc(TnsMem(N) * sizeof(DATA_TYPE));
     }
 }
 #endif
@@ -96,17 +96,17 @@ void init_array()
   TnsMemWr(beta) = 12313;	fprintf(fid, "Line@ %i \n" , __LINE__);
   for (i = 0; i < N; i++)
     {
-      TnsMemWr(u1[TnsMem(i)]) = TnsMem(i);						fprintf(fid, "Line@ %i \n" , __LINE__);
-      TnsMemWr(u2[TnsMem(i)]) = (TnsMem(i)+1)/(N)/2.0;			fprintf(fid, "Line@ %i \n" , __LINE__);
-      TnsMemWr(v1[TnsMem(i)]) = (TnsMem(i)+1)/(N)/4.0;			fprintf(fid, "Line@ %i \n" , __LINE__);
-      TnsMemWr(v2[TnsMem(i)]) = (TnsMem(i)+1)/(N)/6.0;			fprintf(fid, "Line@ %i \n" , __LINE__);
-      TnsMemWr(y[TnsMem(i)]) = (TnsMem(i)+1)/(N)/8.0;			fprintf(fid, "Line@ %i \n" , __LINE__);
-      TnsMemWr(z[TnsMem(i)]) = (TnsMem(i)+1)/(N)/9.0;			fprintf(fid, "Line@ %i \n" , __LINE__);
-      TnsMemWr(x[TnsMem(i)]) = 0.0;								fprintf(fid, "Line@ %i \n" , __LINE__);
-      TnsMemWr(w[TnsMem(i)]) = 0.0;								fprintf(fid, "Line@ %i \n" , __LINE__);
+      TnsMemWr(u1[(i)]) = (i);						fprintf(fid, "Line@ %i \n" , __LINE__);
+      TnsMemWr(u2[(i)]) = ((i)+1)/(N)/2.0;			fprintf(fid, "Line@ %i \n" , __LINE__);
+      TnsMemWr(v1[(i)]) = ((i)+1)/(N)/4.0;			fprintf(fid, "Line@ %i \n" , __LINE__);
+      TnsMemWr(v2[(i)]) = ((i)+1)/(N)/6.0;			fprintf(fid, "Line@ %i \n" , __LINE__);
+      TnsMemWr(y[(i)]) = ((i)+1)/(N)/8.0;			fprintf(fid, "Line@ %i \n" , __LINE__);
+      TnsMemWr(z[(i)]) = ((i)+1)/(N)/9.0;			fprintf(fid, "Line@ %i \n" , __LINE__);
+      TnsMemWr(x[(i)]) = 0.0;								fprintf(fid, "Line@ %i \n" , __LINE__);
+      TnsMemWr(w[(i)]) = 0.0;								fprintf(fid, "Line@ %i \n" , __LINE__);
       for (j = 0; j < N; j++)
 	  {
-		TnsMemWr(A[TnsMem(i)][TnsMem(j)]) = (((DATA_TYPE) TnsMem(i))*TnsMem(j)) / (N);	fprintf(fid, "Line@ %i \n" , __LINE__);
+		TnsMemWr(A[(i)][(j)]) = (((DATA_TYPE) (i))*(j)) / (N);	fprintf(fid, "Line@ %i \n" , __LINE__);
 	  }
     }
 }
@@ -149,24 +149,24 @@ int main(int argc, char** argv)
   for (i = 0; i < N; i++)
     for (j = 0; j < N; j++)
 	{
-      TnsMemWr(A[TnsMem(i)][TnsMem(j)]) = TnsMem(A[TnsMem(i)][TnsMem(j)]) + TnsMem(u1[TnsMem(i)]) * TnsMem(v1[TnsMem(j)]) + TnsMem(u2[TnsMem(i)]) * TnsMem(v2[TnsMem(j)]);	fprintf(fid, "Line@ %i \n" , __LINE__);
+      TnsMemWr(A[(i)][(j)]) = TnsMem(A[(i)][(j)]) + TnsMem(u1[(i)]) * TnsMem(v1[(j)]) + TnsMem(u2[(i)]) * TnsMem(v2[(j)]);	fprintf(fid, "Line@ %i \n" , __LINE__);
 	}
 
   for (i = 0; i < N; i++)
     for (j = 0; j < N; j++)
 	{
-      TnsMemWr(x[TnsMem(i)]) = TnsMem(x[TnsMem(i)]) + TnsMem(beta) * TnsMem(A[TnsMem(j)][TnsMem(i)]) * TnsMem(y[TnsMem(j)]);	fprintf(fid, "Line@ %i \n" , __LINE__);
+      TnsMemWr(x[(i)]) = TnsMem(x[(i)]) + TnsMem(beta) * TnsMem(A[(j)][(i)]) * TnsMem(y[(j)]);	fprintf(fid, "Line@ %i \n" , __LINE__);
 	}
 
   for (i = 0; i < N; i++)
   {
-    TnsMemWr(x[TnsMem(i)]) = TnsMem(x[TnsMem(i)]) + TnsMem(z[TnsMem(i)]);	fprintf(fid, "Line@ %i \n" , __LINE__);
+    TnsMemWr(x[(i)]) = TnsMem(x[(i)]) + TnsMem(z[(i)]);	fprintf(fid, "Line@ %i \n" , __LINE__);
   }
 
   for (i = 0; i < N; i++)
     for (j = 0; j < N; j++)
 	{
-      TnsMemWr(w[TnsMem(i)]) = TnsMem(w[TnsMem(i)]) +  TnsMem(alpha) * TnsMem(A[TnsMem(i)][TnsMem(j)]) * TnsMem(x[TnsMem(j)]);	fprintf(fid, "Line@ %i \n" , __LINE__);
+      TnsMemWr(w[(i)]) = TnsMem(w[(i)]) +  TnsMem(alpha) * TnsMem(A[(i)][(j)]) * TnsMem(x[(j)]);	fprintf(fid, "Line@ %i \n" , __LINE__);
 	}
 
 #pragma endscop
