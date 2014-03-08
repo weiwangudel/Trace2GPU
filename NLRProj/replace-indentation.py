@@ -62,9 +62,9 @@ for ln in range(0, len(lines)):  ## iterates over the lines of the file
 	       print "",
 	     print "{"
 	   else:
+	     print line,
 	     for i in range (0, indent):
 	       print "",
-	     print line,
 	     print "{"
     else:
 	if (last_indent >= indent):    # usually indent < last_indent
