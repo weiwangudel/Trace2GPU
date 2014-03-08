@@ -1,8 +1,5 @@
-#This file read in step0.c file and generate the data structure info
-#The info is output/organized as follows:
-# array1 size1 (in bytes)
-# array2 size2 (in bytes)
-
+#This file read in indented loop structure
+# output open and close parenthesised loop structure
 
 import sys                                                                       
 import string
