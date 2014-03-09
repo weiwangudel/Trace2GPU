@@ -34,9 +34,22 @@ print ""
 f = open(sys.argv[1], 'rU')               
 lines = f.readlines()
 
-fileStr = []
+max = 0;
+for ln in range(0, len(lines)):  ## iterates over the lines of the file
+    line = lines[ln]
+    indent = len(line) - len(line.lstrip())
+    if (max < indent):
+	max = indent
+count = 0
+while (max > 0):
+    print "    int i"+str(count)+";"
+    count += 1
+    max -= 4
+print ""
+
 for ln in range(0, len(lines)):  ## iterates over the lines of the file
     line = lines[ln]
     print "    "+line,
+
 print ""
 print "}"
