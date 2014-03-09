@@ -18,11 +18,16 @@ f_ds = open(sys.argv[2], 'r')
 arrays = f_ds.readlines()
 for cur in range(0, len(arrays)):
   temp = string.split(arrays[cur])
-  print "    double", 
-  print " A"+temp[0],
-  print "[",
-  print temp[1],
-  print "/ 8];"
+  if (long(temp[1]) > 8): 
+      print "    double", 
+      print " A"+temp[0],
+      print "[",
+      print temp[1],
+      print "/ 8];"
+  else:
+      print "    double",
+      print " A"+temp[0],
+      print ";"	
 
 f_ds.close()
 
