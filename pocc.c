@@ -73,10 +73,14 @@ int main(int argc, char** argv)
 	   //resolve address relationship
 	   strcpy(nlr_command, "python ds-reconst.py step0.c step0-ds > step1.c"), 
 	   system(nlr_command);
-	   printf("loop reconstructed, please see step5.c file located here\n");
 	   strcpy(nlr_command, "python post-processing-v4-nlr-output.py step1.c > step5.c");
 	   system(nlr_command);
-	   system("rm step0* step1*");
+	   strcpy(nlr_command, "python replace-indentation.py  step5.c  > step6.c");
+	   system(nlr_command);
+ 	   strcpy(nlr_command, "python combine.py step6.c step0-ds > step7.c");
+	   system(nlr_command);
+	   //system("rm step0* step1* step5*");
+	   printf("loop reconstructed, please see step7.c file located here!\n");
 	   exit(1);
   	}
   }
