@@ -49,9 +49,9 @@ int main(int argc, char** argv)
 	    if (argc > 2) {
 	     //prepare string to execute nlr program
 	     strcpy(nlr_command, "../../nlr-0.5/nlr ");
-	     for (temp = 2; temp < argc; temp++) 
+	     for (temp = 2; temp < argc-1; temp++) 
 	     {
-		if (temp == argc -1 )
+		if (temp == argc - 2 )
 		  strcat(nlr_command, "< ");
 		strcat(nlr_command, argv[temp]);
 		strcat(nlr_command, " ");
@@ -77,10 +77,18 @@ int main(int argc, char** argv)
 	   system(nlr_command);
 	   strcpy(nlr_command, "python replace-indentation.py  step5.c  > step6.c");
 	   system(nlr_command);
- 	   strcpy(nlr_command, "python combine.py step6.c step0-ds > step7.c");
+	   strcpy(nlr_command, "./gen-ET.sh ");
+	   strcat(nlr_command, argv[argc-1]);
 	   system(nlr_command);
+	   // Line26 -- Line 26
+  	   system("sed -i 's/Line/Line /g' step6.c");
+	   strcpy(nlr_command, "python mt-add-et.py step6.c ET > step7.c ");
+	   system(nlr_command);
+ 	   strcpy(nlr_command, "python combine.py step7.c step0-ds > step8.c");
+	   system(nlr_command);
+  	   system("sed -i 's/Constant//g' step8.c");
 	   //system("rm step0* step1* step5*");
-	   printf("loop reconstructed, please see step7.c file located here!\n");
+	   printf("loop reconstructed, please see step8.c file located here!\n");
 	   exit(1);
   	}
   }
