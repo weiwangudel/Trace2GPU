@@ -1,0 +1,33 @@
+
+This program reads a trace and tries to build loop nests that
+reproduce the input data. Details of the algorithm can be found in
+"Prediction and Trace Compression of Data Access Addresses through
+Nested Loop Recognition", by Alain Ketterlin and Philippe Clauss,
+at CGO'2008.
+
+To build the executable (named nlr), just type make. There should be
+no warning, no error. You need a C99 compliant compiler. I've tried
+this on various Linux distributions, with no problem. If you have
+trouble compiling nlr, or get warnings or errors, please send me
+(Alain) the compiler's output (and problematic lines of code if you
+changed the source).
+
+By the way, the code is probably unix-specific, you're on your own if
+you try to compile this on a Windows system.
+
+Also, the software is currently full of dead-code, hacks etc. For any
+usage other than running it on some traces to look at the output
+please contact me, as I have various other versions that may help you
+more than this one.
+
+There is a man-page, and it's more or less up-to-date. Type:
+
+    man ./nlr.1
+
+Feel free to contact me if you have any question or need some specific
+feature. Also, if you do any serious thing with this code, please let
+me know by sending a short description of what you did with it.
+
+Authors:
+* Alain Ketterlin (alain@dpt-info.u-strasbg.fr)
+* Philippe Clauss (clauss@icps.u-strasbg.fr)

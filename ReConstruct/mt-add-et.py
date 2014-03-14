@@ -37,9 +37,9 @@ for ln in range(0, len(lines)):  ## iterates over the lines of the file
 	a = string.split(line)
   	for i in range (0, len(exeLines)):
     	    curExeLine = exeLines[i]
-    	    if (string.find(curExeLine, a[1]) != -1):
+	    b = string.split(curExeLine, '@')
+    	    if (long(b[0]) == long(a[1])):    # should use the value to match!
 	  	#print exeLines[i]
-		b = string.split(curExeLine, '@')
 		#print b[1]
 		c = string.split(b[1], '0')
 		#print c
@@ -48,7 +48,14 @@ for ln in range(0, len(lines)):  ## iterates over the lines of the file
 		   # prepare indentation
 		   for j in range (0, cur_indent):
 			print "", 
-	           print c[i] + curStatement[i],
+		   # judge if (mem-access) is needed
+		   if ((string.find(curStatement[i], "+") != -1) or 
+		      (string.find(curStatement[i], "-") != -1) or 
+		      (string.find(curStatement[i], "*") != -1) or 
+		      (string.find(curStatement[i], "/") != -1)) and (string.find(curStatement[i], "[") == -1):
+	           	print c[i] + "(" + curStatement[i].strip()+")",
+		   else:
+	           	print c[i] + curStatement[i].strip()
 		for j in range (0, cur_indent):
 		      print "", 
 		print c[len(c)-1],
