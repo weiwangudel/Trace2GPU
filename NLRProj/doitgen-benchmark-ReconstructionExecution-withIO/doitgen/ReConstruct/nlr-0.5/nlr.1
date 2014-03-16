@@ -1,0 +1,361 @@
+.TH nlr 1
+.SH NAME
+nlr \- nested loop recognition
+
+.SH SYNOPSIS
+.B nlr
+[options]
+
+.SH DESCRIPTION
+The
+.I nlr
+command reads numbers (or loops) on its standard input and produces a
+sequence of nested loops on its standard output. The output "program"
+produces the exact same values as the input, but is at least as
+compact (hopefully much more) and probably more expressive.
+
+.SH OPTIONS
+
+.SS OPTIONS FOR LOOP BREADTH
+.TP
+.B -k \fInumber\fP
+sets the value of the algorithm's K parameter (the maximal size of a
+loop body). Its default value is 1, so by default
+.B nlr
+searches and produces only perfect loop nests. You almost certainly
+want to set it to some higher value. Remember that the complexity of
+the algorithm is quadratic in K, so be careful with high values. For
+address traces, we typically start with a value of 100, and try with
+higher values if nothing comes out. The CGO paper experiments have
+been performed with K=100 for load traces, and with K=1000 for PC
+traces.
+
+.SS OPTIONS FOR FUNCTION MODELS
+.TP
+.B -v \fImodel\fP
+Function model to use for values, inside tuples
+.TP
+.B -b \fImodel\fP
+Function model to use for loop upper bounds
+.PP
+In both cases,
+.I model
+is one of
+.B poly,
+.B affine,
+or
+.B constant.
+The default value for both -v and -b is
+.B poly,
+which means that you may get (simple) polynomials inside loop bounds
+and values. See the examples below for example of model restriction.
+
+.SS OPTIONS FOR INPUT/OUTPUT FORMATS
+.TP
+.B -i \fIformat\fP
+specifies the input format: one of
+.B text
+(the default) and
+.B xio
+(see below for the format description)
+.TP
+.B -o \fIformat\fP
+specifies the output format: one of
+.B text
+(the default),
+.B xio,
+.B xml,
+or
+.B null
+(meaning no output).
+.TP
+.B -a \fItags\fP
+lets one customize the text output (see below)
+.PP
+The default format is plain
+.B text.
+Input is given as a series of lines, each line containing either a
+single value, or a sequence of values considered elements of a tuple.
+Individual values must be numbers formatted according to C conventions
+(0x10 is the value 16, 010 is 8, 10 is... 10) or symbolic "tags".
+Numeric values are read with
+.BR strtoll(3),
+so please refer to its man page for details. Tags are simple strings,
+starting with an alphanumeric character. The following characters may
+be alphanumeric or any of dot, colon, minus, equal sign. Tags have
+absolutely no predefined meaning: they're output as they're input (and
+of course there's no interpolation of tags). Output is given as a
+series of loops and values. Whenever a value is a tuple of more than 3
+functions, the tuple is written on several lines. All functions (i.e.,
+loop bounds and values) are written as sums of monomials. Each
+monomial has a numerical coefficient followed by zero or more loop
+indices, all separated by *.
+.PP
+The
+.B xio
+format (for input and output) is nothing more than an abridged version
+of the plain text format, with some conventions to avoid writing the
+loop indices. Its only goal is to let the
+.B nlr
+program read back what it produced (see below for an example of such
+usage). This format also has the advantage to be fairly compact, with
+the additionnal property that it compresses well with, e.g., bzip2.
+.PP
+The
+.B xml
+(output only) format is really specific, and should be fairly useless
+unless you need to process the resulting loops. Please contact the
+authors if you need more details.
+.PP
+The
+.B null
+output format is probably useless, except for testing prediction. It
+simply removes all output.
+.PP
+Whenever you use text output, there are a few flags you can set with
+the -a option. The first set of flags determines which numbers will be
+printed in hexadecimal; this is useful when traces contain memory
+addresses. The possible values are 
+.B none
+,
+.B const
+or
+.B all.
+The first value gives all numbers in decimal notation. The second uses
+hexadecimal for constant coefficients only. The last uses hexadecimal
+for all numbers. Another couple of flags sets whether or not you want
+syntactically delimited loop, with all loops ended by a
+.B done
+keyword on its own line (this makes it easier to convert the output
+to, say, C, to run the loops). Possible values are
+.B short
+to keep the indentation-only text, or
+.B delim
+to request delimited loops. Finally, you can also pass the tag
+.B line
+to prevent tuples to be broken over several lines.
+.PP
+There are two more things you can give to -a. The first is a single
+number, which defines the number of spaces that make up one level of
+indentation. The second is any string (that is, anything that does not
+correspond to a flag or a number) that will be used for loop indices'
+names (with a number appended to it). Of course, you have to give
+several -a <something> if you want to change several parameters. Let
+me repeat: this applies only to text output.
+
+.SS OPTIONS FOR PREDICTION
+.TP
+.B -p \fIdepth\fP
+Makes the program scan
+.I depth
+terms down the stack to find a base term for prediction. The default
+value is 0, meaning no prediction. This parameter usually has the same
+value as that given to -k.
+.TP
+.B -d \fIdistance\fP
+The prediction distance. The default value is 0, meaning that the next
+value is predicted. Any value greater than 0 makes the prediction be
+repeated that number of times, with the last predicted value being
+output.
+.TP
+.B -w \fInumber\fP
+After having moved to the n-th next value (with -d),
+.I number
+values are predicted. Default value is 1 when prediction is required.
+.PP
+Predictions are written to the standard error. The output of the
+program is a mix of two kinds of lines.
+.TP
+.B O lines
+These lines just output the observed value. The format is
+.B O:\fIn\fP:\fIn\fP:\fIvalue\fP
+where the first field is the letter 0, the second and third fields are
+the index of the value (starting at 1), and the fourth field is the
+read value prefixed by the symbol #
+.TP
+.B P lines
+These lines indicate a prediction. The format is
+.B P:\fIn\fP:\fIm\fP:\fIvalue\fP
+where the first field is the letter P, the second field is the index
+at which the prediction is made, the third field is the index for
+which the prediction is made, and the fourth is the predicted value
+(with # prepended) or the word PASS in cases where no prediction could
+be made. Here is an example invocation:
+.PP
+.RS
+.nf
+% nlr -k 20 -p 1 -d 3 -w 2 < test.trace \\
+  > test.loop 2> test.pred
+.fi
+.RE
+.PP
+the output (in file test.pred) is:
+.PP
+.RS
+.nf
+O:1:1:#1
+P:1:5:PASS
+P:1:6:PASS
+O:2:2:#1
+P:2:6:PASS
+P:2:7:PASS
+O:3:3:#1
+P:3:7:#1
+P:3:8:#1
+ ...
+.fi
+.RE
+.PP
+The first line means that the first input value is 1. The second and
+third lines mean that no prediction could be made for the fifth and
+sixth value at this point. The fourth line means that the second input
+value was 1, etc. The seventh line shows that the third input value
+was again 1. At that point, the value 1 was predicted for the seventh
+and eightth values.
+.PP
+If you need to do some statistics on this output, contact the authors
+to obtain a small awk-script that computes the numbers of
+correct/wrong/missing predictions.
+
+.SS OPTIONS FOR DEBUGGING
+.TP
+.B -g \fImask\fP
+A value of
+.I mask
+different from zero makes the program output several debugging
+informations on its standard error. Actually, this works reliably only
+with the value 1, which prints a counter indicating how many values
+have been processed. Other values may produce unexpected results. Let
+us know if you need more info.
+.TP
+.B -e \fInumber\fP
+Makes the program output (on standard error) the upper part of the
+stack every
+.I number
+input data. The default value is -1, meaning never.
+.TP
+.B -m \fInumber\fP
+Defines how much of the stack is shown when the stack is printed. The
+default value is 5.
+
+.SH EXAMPLES
+Here are a few examples. Given the input:
+.PP
+.RS
+.nf
+0x6000000000d9e638
+0x6000000000d9e640
+0x6000000000d9e648
+0x6000000000d9e650
+ ...
+.fi
+.RE
+.PP
+(in, say, file test.trace),
+.B nlr
+can be run like that:
+.PP
+.RS
+.nf
+% nlr < test.trace
+.fi
+.RE
+.PP
+The output looks like this (this is a load instruction trace from the
+SPEC2000 swim program):
+.PP
+.RS
+.nf
+for i0 = 0 to 1333
+  for i1 = 0 to 1333
+    val 6917529027655362104 + 10680*i0 + 8*i1
+.fi
+.RE
+.PP
+If you want to use a larger value of K, use:
+.PP
+.RS
+.nf
+% nlr -k 100 < test.trace
+.fi
+.RE
+.PP
+If you want to also require constant loop bounds and affine values,
+use:
+.PP
+.RS
+.nf
+% nlr -k 100 -v affine -b constant < test.trace
+.fi
+.RE
+.PP
+A common use is to stored the xio-formatted result in a file
+.PP
+.RS
+.nf
+% nlr -k 100 -v affine -b constant -o xio \\
+  < test.trace > test.xio
+.fi
+.RE
+.PP
+In this case, you can later reprocess the resulting loop nests with a
+larger value of K:
+.PP
+.RS
+.nf
+% nlr -k 500 -v affine -b constant \\
+  -i xio -o xio < test.xio > test-500.xio
+.fi
+.RE
+.PP
+To re-use a xio file, you have to use the exact same function models
+for both runs, otherwise the second will refuse to load the file.
+.PP
+This is probably as complex as it can get. However, input data can be
+given in the form of vectors, or tuples, of numbers. Here is an
+example input file with 2 elements per tuple (i.e., line):
+.PP
+.RS
+.nf
+0x60000000000057b8 0x6000000001b34b08
+0x60000000000057c0 0x6000000001b34b10
+0x60000000000057c8 0x6000000001b34b18
+ ...
+.fi
+.RE
+.PP
+The
+.B nlr
+command can directly consume such data. In this case (each line shows
+the memory load accesses performed by one basic block of the swim
+program), the output is the following:
+.PP
+.RS
+.nf
+for i0 = 0 to 1333
+  val 6917529027641104312 + 8*i0 , 6917529027669609224 + 8*i0
+.fi
+.RE
+.PP
+(Yes, all numbers are output in decimal.)
+.PP
+Of course, it is possible to give as input any mix of tuples of
+differents sizes, tuples of different sizes will never be
+interpolated. If you put symbolic values (tags) in tuples, only tuples
+having the exact same tags in the exact same positions will be
+interpolated.
+
+.SH BUGS
+Probably a lot. Let us know if you observe strange behavior.
+
+.SH AUTHOR
+Alain Ketterlin (alain@dpt-info.u-strasbg.fr) and Philippe Clauss
+(clauss@icps.u-strasbg.fr)
+.PP
+Source code and related documents can be obtained from
+http://icps.u-strasbg.fr/nlr/
+or by contacting the authors.
+
+.SH COPYRIGHT
+Copyright (C) 2008 Alain Ketterlin, Philippe Clauss
+.PP
