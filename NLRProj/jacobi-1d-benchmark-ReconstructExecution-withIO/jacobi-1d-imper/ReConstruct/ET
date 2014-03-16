@@ -1,0 +1,6 @@
+33@0=((DATA_TYPE)0+0)/0;
+35@0=((DATA_TYPE)0+0)/0;
+52@fprintf(stderr,DATA_PRINTF_MODIFIER,0);
+54@if(0%0==0)fprintf(stderr,"\n");
+75@0=0*(0+0+0);
+79@0=0;
