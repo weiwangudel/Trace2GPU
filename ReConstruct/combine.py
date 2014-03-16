@@ -9,6 +9,7 @@ import re
 print "#include <stdio.h>"
 print ""
 print "#define DATA_TYPE double"
+print "#define DATA_PRINTF_MODIFIER \"%0.2lf \""
 print "int main()"
 print "{"
 

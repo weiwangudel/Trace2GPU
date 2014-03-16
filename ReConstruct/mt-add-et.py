@@ -43,6 +43,7 @@ for ln in range(0, len(lines)):  ## iterates over the lines of the file
 		#print b[1]
 		c = string.split(b[1], '0')
 		#print c
+		print c[0],
 		print curStatement[0],	
   	        for i in range (1, len(curStatement)):
 		   # prepare indentation
