@@ -353,9 +353,14 @@ int main(int argc, char* argv[])
             for(int j=0; j<m*NSpecies; j++)
             {
                 C_[i][j] = Ck[i][j];
-                Profiles << R[i] << "\t" << Z[j] << "\t" << Ck[i][j] << "\t" << Ck[i][j*NSpecies-1] << "\n";
             }
         }
+
+        if (k % 100 == 0) {
+        for(int i=0; i<n; i++)
+            for(int j=0; j<m*NSpecies; j++)
+                  Profiles << R[i] << "\t" << Z[j] << "\t" << Ck[i][j] << "\t" << Ck[i][j*NSpecies-1] << "\n";
+        } 
 
         //Output current
         if (k % CadaCuantos == 0)
