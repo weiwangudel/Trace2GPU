@@ -3,7 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
-#include <omp.h>
+//#include <omp.h>
 
 int main(int argc, char* argv[])
 {
@@ -229,6 +229,9 @@ int main(int argc, char* argv[])
     // BEGIN SIMULATION
     int stop = t;
     double Theta = theta_i;
+
+    #pragma acc data 
+    {
     for(int k=0; k<stop; k++)
     {
         if( k < t/2 ) { Theta -= deltaTheta; }
@@ -269,6 +272,7 @@ int main(int argc, char* argv[])
 
         //--- Z SWEEP---
         //#pragma omp parallel for
+        #pragma acc kernels loop independent
         for(int i=1; i<n-1; i++)
         {
             //Delta species A
@@ -294,17 +298,17 @@ int main(int argc, char* argv[])
             Ck[i][m*NSpecies-1] = CB;
 
             // Set Delta'[0] and pointer to gamma_mod
-            std::vector<double>* ga_modZ;
+            //std::vector<double>* ga_modZ;
             if(i < n_e)
             {
                 //Ck[i][0] = 1.0 / (1.0 + exp(-Theta));//Nernst
                 Ck[i][0] = 1.;//bulk condition (inverted coefficients)
-                ga_modZ = &ga_modZ1;
+                //ga_modZ = &ga_modZ1;
             }
             else
             {
                 Ck[i][0] = 1.;//bulk condition (inverted coefficients)
-                ga_modZ = &ga_modZ2;
+                //ga_modZ = &ga_modZ2;
             }
 
             // Delta'[m>0] (we use the same vector as for concentrations...)
@@ -313,13 +317,17 @@ int main(int argc, char* argv[])
             {
                 if(i < n_e)
                 {
+                /* Ck[i][j] = ( Ck[i][j] - Ck[i][j-1] * z_al[j] )
+                    / ( z_be[j] - (*ga_modZ)[j-1] * z_al[j] ); */
                 Ck[i][j] = ( Ck[i][j] - Ck[i][j-1] * z_al[j] )
-                    / ( z_be[j] - (*ga_modZ)[j-1] * z_al[j] );
+                    / ( z_be[j] - ga_modZ1[j-1] * z_al[j] );
                 }
                 else
                 {
-                Ck[i][j] = ( Ck[i][j] - Ck[i][j-1] * z2_al[j] )
-                    / ( z2_be[j] - (*ga_modZ)[j-1] * z2_al[j] );
+                /* Ck[i][j] = ( Ck[i][j] - Ck[i][j-1] * z2_al[j] )
+                    / ( z2_be[j] - (*ga_modZ)[j-1] * z2_al[j] ); */
+                 Ck[i][j] = ( Ck[i][j] - Ck[i][j-1] * z2_al[j] )
+                    / ( z2_be[j] - ga_modZ2[j-1] * z2_al[j] ); 
                 }
             }
             //species B
@@ -327,13 +335,17 @@ int main(int argc, char* argv[])
             {
                 if(i < n_e)
                 {
+                /*Ck[i][j+m] = ( Ck[i][j+m] - Ck[i][j+m-1] * z_al[j+m] )
+                    / ( z_be[j+m] - (*ga_modZ)[j+m-1] * z_al[j+m] );*/
                 Ck[i][j+m] = ( Ck[i][j+m] - Ck[i][j+m-1] * z_al[j+m] )
-                    / ( z_be[j+m] - (*ga_modZ)[j+m-1] * z_al[j+m] );
+                    / ( z_be[j+m] - ga_modZ1[j+m-1] * z_al[j+m] );
                 }
                 else
                 {
-                Ck[i][j+m] = ( Ck[i][j+m] - Ck[i][j+m-1] * z2_al[j+m] )
-                    / ( z2_be[j+m] - (*ga_modZ)[j+m-1] * z2_al[j+m] );
+                /* Ck[i][j+m] = ( Ck[i][j+m] - Ck[i][j+m-1] * z2_al[j+m] )
+                    / ( z2_be[j+m] - (*ga_modZ)[j+m-1] * z2_al[j+m] ); */
+                 Ck[i][j+m] = ( Ck[i][j+m] - Ck[i][j+m-1] * z2_al[j+m] )
+                    / ( z2_be[j+m] - ga_modZ2[j+m-1] * z2_al[j+m] ); 
                 }
             }
 
@@ -342,7 +354,10 @@ int main(int argc, char* argv[])
             Ck[i][m*NSpecies-1] = CB;
             for(int j=m*NSpecies-2; j>=0; j--)
             {
-                Ck[i][j] = Ck[i][j]-(*ga_modZ)[j]*Ck[i][j+1];
+                if (i < n_e)
+                  Ck[i][j] = Ck[i][j]-ga_modZ1[j]*Ck[i][j+1];
+                else
+                  Ck[i][j] = Ck[i][j]-ga_modZ2[j]*Ck[i][j+1];
             }
 
         }
@@ -469,5 +484,7 @@ int main(int argc, char* argv[])
 
 
     }
+
+    } // end of pragma acc data 
 /****************** end simulation *************************************/
 }
