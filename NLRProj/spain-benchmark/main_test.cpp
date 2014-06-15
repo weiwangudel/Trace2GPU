@@ -224,7 +224,8 @@ int main(int argc, char* argv[])
             / (r_beB[i] - ga_modRB[i-1] * r_alB[i]);
     }
 
-
+/************************************************************************/
+/************************************************************************/
     // BEGIN SIMULATION
     int stop = t;
     double Theta = theta_i;
@@ -265,7 +266,6 @@ int main(int argc, char* argv[])
                 C_[i][j] = Ck[i][j];
             }
         }
-
 
         //--- Z SWEEP---
         //#pragma omp parallel for
@@ -422,11 +422,11 @@ int main(int argc, char* argv[])
                      / ( r_be[i] - ga_modR[i-1] * r_al[i] );
             }
 
-         //solve by back substitution
-         for(int i=n-2; i>=0; i--)
-            {
-             Ck[i][j] = Ck[i][j] - ga_modR[i]*Ck[i+1][j];
-            }
+            //solve by back substitution
+            for(int i=n-2; i>=0; i--)
+               {
+                Ck[i][j] = Ck[i][j] - ga_modR[i]*Ck[i+1][j];
+               }
         }
 
         //species B
@@ -460,13 +460,14 @@ int main(int argc, char* argv[])
                      / ( r_beB[i] - ga_modRB[i-1] * r_alB[i] );
             }
 
-         //solve by back substitution
-         for(int i=n-2; i>=0; i--)
-         {
-             Ck[i][j+m] = Ck[i][j+m] - ga_modRB[i]*Ck[i+1][j+m];
-         }
+            //solve by back substitution
+            for(int i=n-2; i>=0; i--)
+            {
+                Ck[i][j+m] = Ck[i][j+m] - ga_modRB[i]*Ck[i+1][j+m];
+            }
         }
 
 
     }
+/****************** end simulation *************************************/
 }
