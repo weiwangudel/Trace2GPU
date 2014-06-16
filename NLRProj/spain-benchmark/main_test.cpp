@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
+#include <malloc.h>
 //#include <omp.h>
 
 int main(int argc, char* argv[])
@@ -118,15 +119,56 @@ int main(int argc, char* argv[])
 
 
     // THOMAS COEFFICIENTS
-    std::vector<double> z_al(m*NSpecies,0.0), z_be(m*NSpecies,0.0), z_ga(m*NSpecies,0.0);
-    std::vector<double> z2_al(m*NSpecies,0.0), z2_be(m*NSpecies,0.0), z2_ga(m*NSpecies,0.0);
-    std::vector<double> ga_modZ1(m*NSpecies, 0.0), ga_modZ2(m*NSpecies, 0.0);
+    //std::vector<double> z_al(m*NSpecies,0.0), z_be(m*NSpecies,0.0), z_ga(m*NSpecies,0.0);
+    double *z_al = (double *)malloc(sizeof(double) * m*NSpecies);
+    double *z_be = (double *)malloc(sizeof(double) * m*NSpecies);
+    double *z_ga = (double *)malloc(sizeof(double) * m*NSpecies);
+    
+    //std::vector<double> z2_al(m*NSpecies,0.0), z2_be(m*NSpecies,0.0), z2_ga(m*NSpecies,0.0);
+    double *z2_al = (double *)malloc(sizeof(double) * m*NSpecies);
+    double *z2_be = (double *)malloc(sizeof(double) * m*NSpecies);
+    double *z2_ga = (double *)malloc(sizeof(double) * m*NSpecies);
 
-    std::vector<double> r_al(n,0.0), r_be(n,0.0), r_ga(n,0.0);
-    std::vector<double> r_alB(n,0.0), r_beB(n,0.0), r_gaB(n,0.0);
-    std::vector<double> ga_modR(n, 0.0);
-    std::vector<double> ga_modRB(n, 0.0);
+    //std::vector<double> ga_modZ1(m*NSpecies, 0.0), ga_modZ2(m*NSpecies, 0.0);
+    double *ga_modZ1 = (double *)malloc(sizeof(double) * m*NSpecies);
+    double *ga_modZ2 = (double *)malloc(sizeof(double) * m*NSpecies);
+    
+    for (int ww=0; ww < m*NSpecies; ww++) {
+      z_al[ww]=0.0;
+      z_be[ww]=0.0;
+      z_ga[ww]=0.0;
+      z2_al[ww]=0.0;
+      z2_be[ww]=0.0;
+      z2_ga[ww]=0.0;
+      ga_modZ1[ww]=0.0;
+      ga_modZ2[ww]=0.0;
+    }
+    
 
+    //std::vector<double> r_al(n,0.0), r_be(n,0.0), r_ga(n,0.0);
+    double *r_al = (double*) malloc(sizeof(double) *n);
+    double *r_be = (double*) malloc(sizeof(double) *n);
+    double *r_ga = (double*) malloc(sizeof(double) *n);
+
+    //std::vector<double> r_alB(n,0.0), r_beB(n,0.0), r_gaB(n,0.0);
+    double *r_alB = (double*) malloc(sizeof(double) *n);
+    double *r_beB = (double*) malloc(sizeof(double) *n);
+    double *r_gaB = (double*) malloc(sizeof(double) *n);
+    //std::vector<double> ga_modR(n, 0.0);
+    //std::vector<double> ga_modRB(n, 0.0);
+    double *ga_modR = (double*) malloc(sizeof(double) *n);
+    double *ga_modRB = (double*) malloc(sizeof(double) *n);
+
+    for (int ww=0; ww < n; ww++ ) {
+      r_al    [ww]=0.0;
+      r_be    [ww]=0.0;
+      r_ga    [ww]=0.0;
+      r_alB   [ww]=0.0;
+      r_beB   [ww]=0.0;
+      r_gaB   [ww]=0.0;
+      ga_modR [ww]=0.0;
+      ga_modRB[ww]=0.0;
+    }
 
     //Z-direction (A and B coupled problems)
     //species A ("inverted" coefficients)
@@ -230,7 +272,7 @@ int main(int argc, char* argv[])
     int stop = t;
     double Theta = theta_i;
 
-    #pragma acc data 
+    #pragma acc data copy(Ck[0:n-1], C_[0:n-1])
     {
     for(int k=0; k<stop; k++)
     {
@@ -272,7 +314,9 @@ int main(int argc, char* argv[])
 
         //--- Z SWEEP---
         //#pragma omp parallel for
-        #pragma acc kernels loop independent
+        #pragma acc kernels  
+      {
+        #pragma acc loop independent worker(32)
         for(int i=1; i<n-1; i++)
         {
             //Delta species A
@@ -361,6 +405,7 @@ int main(int argc, char* argv[])
             }
 
         }
+      }  //  acc 
 
         //copy concentration grid
         for(int i=0; i<n; i++)
@@ -372,6 +417,7 @@ int main(int argc, char* argv[])
         }
 
         if (k % 100 == 0) {
+        #pragma acc update host(Ck[0:n*m*NSpecies])
         for(int i=0; i<n; i++)
             for(int j=0; j<m*NSpecies; j++)
                   Profiles << R[i] << "\t" << Z[j] << "\t" << Ck[i][j] << "\t" << Ck[i][j*NSpecies-1] << "\n";
@@ -407,6 +453,7 @@ int main(int argc, char* argv[])
         //--- R SWEEP---
         //#pragma omp parallel for
         //species A
+        #pragma acc loop
         for(int j=1; j<m-1; j++)
         {
             // set Deltas
@@ -445,6 +492,7 @@ int main(int argc, char* argv[])
         }
 
         //species B
+        #pragma acc loop
         for(int j=1; j<m-1; j++)
         {
             // set Deltas
