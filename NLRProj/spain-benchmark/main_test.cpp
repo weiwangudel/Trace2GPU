@@ -425,7 +425,7 @@ r_beB[0:n], r_gaB[0:n], ga_modR[0:n], ga_modRB[0:n])
         }
 
         if (k % 100 == 0) {
-        #pragma acc update host(Ck[0:n*m*NSpecies])
+        #pragma acc update host(Ck)
         for(int i=0; i<n; i++)
             for(int j=0; j<m*NSpecies; j++)
                   Profiles << R[i] << "\t" << Z[j] << "\t" << Ck[i][j] << "\t" << Ck[i][j*NSpecies-1] << "\n";
