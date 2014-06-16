@@ -16,10 +16,10 @@ int main(int argc, char* argv[])
     int Guardar = 1000;//Npoints to save in file
 
     //Set system parameters
-    long double K0 = 1.e4;//dimensionless (= k0*re/DA)
-    long double alpha = 0.5;//transfer coefficient
-    long double dB = 1.;//dimensionles (=DB/DA)
-    long double CB = 0.;//dimensionless (=cB*/cA*)
+    double K0 = 1.e4;//dimensionless (= k0*re/DA)
+    double alpha = 0.5;//transfer coefficient
+    double dB = 1.;//dimensionles (=DB/DA)
+    double CB = 0.;//dimensionless (=cB*/cA*)
     int NSpecies = 2;
 
     // Specify simulation parameters
