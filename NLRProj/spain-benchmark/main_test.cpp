@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
         h *= omega;
     }
     int m = Z.size(); // number of spacesteps (Z)
+    printf("m:%d\n", m);
 
     // Make R grid
     std::vector<double> R;
@@ -73,6 +74,7 @@ int main(int argc, char* argv[])
         R.push_back( 1 - R[i] );
     }
     int n_e = R.size(); // number spacesteps over electrode
+    printf("n_e:%d\n", n_e);
 
     h = h0;
     while( R.back() <= maxR ) {
@@ -80,6 +82,7 @@ int main(int argc, char* argv[])
         h *= omega;
     }
     int n = R.size(); //total number of spacesteps (R)
+    printf("n:%d\n", n);
 
 
     //print out grid
@@ -93,13 +96,15 @@ int main(int argc, char* argv[])
 
 
     // CONCENTRATION MATRICES (and initial conc. values)
-    double** Ck = new double*[n];
-    double** C_ = new double*[n];
+    //double** Ck = new double*[n];
+    //double** C_ = new double*[n];
+    double Ck[303][147*2];
+    double C_[303][147*2];
 
     for(int i=0; i<n; ++i)
     {
-        Ck[i] = new double[m*NSpecies];//new timestep
-        C_[i] = new double[m*NSpecies];//previous timestep
+//        Ck[i] = new double[m*NSpecies];//new timestep
+//        C_[i] = new double[m*NSpecies];//previous timestep
 
         // set initial concentrations
         for(int j=0; j<(m*NSpecies); j++)
@@ -272,7 +277,10 @@ int main(int argc, char* argv[])
     int stop = t;
     double Theta = theta_i;
 
-    #pragma acc data copy(Ck[0:n-1], C_[0:n-1])
+    #pragma acc data copy(z_al[0:m*NSpecies], z_be[0:m*NSpecies],z_ga[0:m*NSpecies],ga_modZ1[0:m*NSpecies], \
+z_ga[0:m*NSpecies],C_, Ck, z2_al[0:m*NSpecies], z2_be[0:m*NSpecies], z2_ga[0:m*NSpecies], \
+ga_modZ2[0:m*NSpecies], r_al[0:n], r_be[0:n], r_ga[0:n], r_alB[0:n], \
+r_beB[0:n], r_gaB[0:n], ga_modR[0:n], ga_modRB[0:n])
     {
     for(int k=0; k<stop; k++)
     {
