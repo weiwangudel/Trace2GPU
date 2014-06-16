@@ -322,7 +322,8 @@ r_beB[0:n], r_gaB[0:n], ga_modR[0:n], ga_modRB[0:n])
 
         //--- Z SWEEP---
         //#pragma omp parallel for
-        #pragma acc kernels  
+        #pragma acc kernels  copyin(z_al[0:m*NSpecies], z_be[0:m*NSpecies],z_ga[0:m*NSpecies],ga_modZ1[0:m*NSpecies], \
+z_ga[0:m*NSpecies],C_, Ck)
       {
         #pragma acc loop independent worker(32)
         for(int i=1; i<n-1; i++)
