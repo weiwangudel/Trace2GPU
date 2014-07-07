@@ -326,6 +326,7 @@ r_beB[0:n], r_gaB[0:n], ga_modR[0:n], ga_modRB[0:n])
 z_ga[0:m*NSpecies],C_, Ck)
       {
         #pragma acc loop independent worker(32)
+        #pragma omp parallel  for
         for(int i=1; i<n-1; i++)
         {
             //Delta species A
@@ -425,13 +426,13 @@ z_ga[0:m*NSpecies],C_, Ck)
             }
         }
 
-        if (k % 100 == 0) {
-        #pragma acc update host(Ck)
-        for(int i=0; i<n; i++)
-            for(int j=0; j<m*NSpecies; j++)
-                  Profiles << R[i] << "\t" << Z[j] << "\t" << Ck[i][j] << "\t" << Ck[i][j*NSpecies-1] << "\n";
-        } 
-
+//        if (k % 100 == 0) {
+//        #pragma acc update host(Ck)
+//        for(int i=0; i<n; i++)
+//            for(int j=0; j<m*NSpecies; j++)
+//                  Profiles << R[i] << "\t" << Z[j] << "\t" << Ck[i][j] << "\t" << Ck[i][j*NSpecies-1] << "\n";
+//        } 
+//
         //Output current
         if (k % CadaCuantos == 0)
            {
@@ -447,22 +448,23 @@ z_ga[0:m*NSpecies],C_, Ck)
 
 
         //Output concentration profiles (only at the end)
-        if(k == stop - 1)
-        {
-            for(int j=0; j<m; j++)
-            {
-                for(int i=0; i<n; i++)
-                 {
-                     Profiles << R[i] << "\t" << Z[j] << "\t" << Ck[i][m-j-1] << "\t" << Ck[i][j+m] << "\n";
-                 }
-            }
-        }
-
+//        if(k == stop - 1)
+//        {
+//            for(int j=0; j<m; j++)
+//            {
+//                for(int i=0; i<n; i++)
+//                 {
+//                     Profiles << R[i] << "\t" << Z[j] << "\t" << Ck[i][m-j-1] << "\t" << Ck[i][j+m] << "\n";
+//                 }
+//            }
+//        }
+//
 
         //--- R SWEEP---
         //#pragma omp parallel for
         //species A
         #pragma acc loop
+        #pragma omp parallel for
         for(int j=1; j<m-1; j++)
         {
             // set Deltas
@@ -501,7 +503,8 @@ z_ga[0:m*NSpecies],C_, Ck)
         }
 
         //species B
-        #pragma acc loop
+        //#pragma acc loop
+        #pragma omp parallel for
         for(int j=1; j<m-1; j++)
         {
             // set Deltas
